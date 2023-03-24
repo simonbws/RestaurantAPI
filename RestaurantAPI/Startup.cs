@@ -16,6 +16,8 @@ namespace RestaurantAPI
             services.AddControllers();
             services.AddDbContext<RestaurantDbContext>(); //dodanie db contextu
             services.AddScoped<RestaurantSeeder>(); //rejestracja serwisu seedującego
+            //assembly czyli zrodlo typu w ktorym automapper przeszuka wszystkie typy do potrzebnej konfiguracji
+            services.AddAutoMapper(this.GetType().Assembly);
         }
     
 
