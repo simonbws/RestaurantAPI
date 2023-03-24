@@ -12,7 +12,7 @@ namespace RestaurantAPI
 
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddTransient<IWeatherForecastService, WeatherForecastService>();
+            
             services.AddControllers();
             services.AddDbContext<RestaurantDbContext>(); //dodanie db contextu
             services.AddScoped<RestaurantSeeder>(); //rejestracja serwisu seedującego
