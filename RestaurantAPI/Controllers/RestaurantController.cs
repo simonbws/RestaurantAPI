@@ -8,6 +8,7 @@ using RestaurantAPI.Services;
 namespace RestaurantAPI.Controllers
 {
     [Route("api/restaurant")]
+    [ApiController]
     public class RestaurantController : ControllerBase
 
     {
@@ -23,15 +24,8 @@ namespace RestaurantAPI.Controllers
         //przyjmuje od klienta poprzez cialo zapytania(frombody)
         public ActionResult Update([FromBody] UpdateRestaurantDTO dto, [FromRoute]int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var isUpdated = _restaurantService.Update(id, dto);
-            if (!isUpdated)
-            {
-                return NotFound();
-            }
+            
+            _restaurantService.Update(id, dto);
             return Ok();
 
         }
@@ -39,25 +33,13 @@ namespace RestaurantAPI.Controllers
         [HttpDelete("{id}")]
         public ActionResult Delete([FromRoute] int id)
         {
-           var isDeleted = _restaurantService.Delete(id);
-
-            if (isDeleted)
-            {
-                return NoContent(); //oznacza 200 ale nic nie zwraca
-            }
-            return NotFound();
+           _restaurantService.Delete(id);
+            return NoContent(); //oznacza 200 ale nic nie zwraca
         }
 
         [HttpPost]
         public ActionResult CreateRestaurant([FromBody] CreateRestaurantDTO dto)
-        {
-            //sprawdza czy atrybuty walidacji sa poprawnie wprowadzone
-            //np [Required]
-            if(!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
+        {  
             var id = _restaurantService.Create(dto);
             return Created($"/api/restaurant/{id}", null);
         }
@@ -75,10 +57,7 @@ namespace RestaurantAPI.Controllers
         {
 
             var restaurant = _restaurantService.GetById(id);
-            if (restaurant is null)
-            {
-                return NotFound();
-            }
+            
             return Ok(restaurant);
         }
     }

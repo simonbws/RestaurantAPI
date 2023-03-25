@@ -1,4 +1,5 @@
 ﻿using RestaurantAPI.Entities;
+using RestaurantAPI.Middleware;
 using RestaurantAPI.Services;
 
 namespace RestaurantAPI
@@ -20,6 +21,7 @@ namespace RestaurantAPI
             //assembly czyli zrodlo typu w ktorym automapper przeszuka wszystkie typy do potrzebnej konfiguracji
             services.AddAutoMapper(this.GetType().Assembly);
             services.AddScoped<IRestaurantService, RestaurantService>();
+            services.AddScoped<ErrorHandlingMiddleware>();
         }
     
 
@@ -30,9 +32,10 @@ namespace RestaurantAPI
         {
             app.UseDeveloperExceptionPage();
         }
+        app.UseMiddleware<ErrorHandlingMiddleware>();
         app.UseHttpsRedirection();
         app.UseRouting();
-        app.UseAuthorization();
+       
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
