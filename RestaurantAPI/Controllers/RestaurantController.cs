@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RestaurantAPI.DTO;
 using RestaurantAPI.Entities;
+using RestaurantAPI.Services;
 
 namespace RestaurantAPI.Controllers
 {
@@ -11,47 +12,57 @@ namespace RestaurantAPI.Controllers
 
     {
         //wstrzykniecie dbcontex w celu pobrania z bazy danych restauracji
-        private readonly RestaurantDbContext _dbContext;
-        private readonly IMapper _mapper;
-        public RestaurantController(RestaurantDbContext dbContext, IMapper mapper)
+        private readonly IRestaurantService _restaurantService;
+        
+
+        public RestaurantController(IRestaurantService restaurantService)
         {
-            _dbContext = dbContext;
-            _mapper = mapper;
+            _restaurantService = restaurantService;
+        }
+        [HttpDelete("{id}")]
+        public ActionResult Delete([FromRoute] int id)
+        {
+           var isDeleted = _restaurantService.Delete(id);
+
+            if (isDeleted)
+            {
+                return NoContent(); //oznacza 200 ale nic nie zwraca
+            }
+            return NotFound();
+        }
+
+        [HttpPost]
+        public ActionResult CreateRestaurant([FromBody] CreateRestaurantDTO dto)
+        {
+            //sprawdza czy atrybuty walidacji sa poprawnie wprowadzone
+            //np [Required]
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var id = _restaurantService.Create(dto);
+            return Created($"/api/restaurant/{id}", null);
         }
         //akcja ktora bedzie odpowiadac na zapytania get i zwroci wszystkie
         //restauracje z bazy danych do klienta
         [HttpGet]
         public ActionResult<IEnumerable<RestaurantDTO>> GetAll()
         {
-            //w takiej sytuacji ms sql stworzy zapytanie ktore pobierze z bazy danych resutracje i zwroci pod postacia restaurants
-            var restaurants = _dbContext
-                .Restaurants
-                //na tej podstawie Entity Fr. dolacza odpowiednie tabele do wyniku zapytania
-                .Include(r => r.Address)
-                .Include(r => r.Dishes)
-                .ToList();
-            //obiekt restaurantsDtos musi byc zmapowany na podst restrauracji z DB
-            //jako generyczny parametr typ na ktory mapujemy i jako arguement zrodlo z ktorego chcemy mapowac (restauracje)
-            var restaurantsDtos = _mapper.Map<List<RestaurantDTO>>(restaurants);
+            var restaurantDtos = _restaurantService.GetAll();
 
-            return Ok(restaurantsDtos);
+            return Ok(restaurantDtos);
         }
         [HttpGet("{id}")]
         public ActionResult<RestaurantDTO> Get([FromRoute] int id)
         {
-            var restaurant = _dbContext
-                .Restaurants
-                .Include(r => r.Address)
-                .Include(r => r.Dishes)
-                .FirstOrDefault(r => r.Id == id);
 
+            var restaurant = _restaurantService.GetById(id);
             if (restaurant is null)
             {
                 return NotFound();
             }
-
-            var restaurantDto = _mapper.Map<RestaurantDTO>(restaurant);
-            return Ok(restaurantDto);
+            return Ok(restaurant);
         }
     }
 }

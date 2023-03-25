@@ -1,4 +1,5 @@
 ﻿using RestaurantAPI.Entities;
+using RestaurantAPI.Services;
 
 namespace RestaurantAPI
 {
@@ -18,6 +19,7 @@ namespace RestaurantAPI
             services.AddScoped<RestaurantSeeder>(); //rejestracja serwisu seedującego
             //assembly czyli zrodlo typu w ktorym automapper przeszuka wszystkie typy do potrzebnej konfiguracji
             services.AddAutoMapper(this.GetType().Assembly);
+            services.AddScoped<IRestaurantService, RestaurantService>();
         }
     
 
