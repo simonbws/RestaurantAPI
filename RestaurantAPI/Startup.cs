@@ -21,6 +21,7 @@ namespace RestaurantAPI
             //assembly czyli zrodlo typu w ktorym automapper przeszuka wszystkie typy do potrzebnej konfiguracji
             services.AddAutoMapper(this.GetType().Assembly);
             services.AddScoped<IRestaurantService, RestaurantService>();
+            services.AddScoped<IDishService, DishService>();
             services.AddScoped<ErrorHandlingMiddleware>();
             services.AddScoped<RequestTimeMiddleware>();
             services.AddSwaggerGen();
