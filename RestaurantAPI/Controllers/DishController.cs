@@ -27,7 +27,7 @@ namespace RestaurantAPI.Controllers
             var newDishId = _dishService.Create(restaurantId, dto);
             return Created($"api/restaurant/{restaurantId}/dish/{newDishId}", null);
         }
-        [HttpGet("{dishId")]
+        [HttpGet("{dishId}")]
         public ActionResult<DishDTO> Get([FromRoute] int restaurantId, [FromRoute] int dishId)
         {
             DishDTO dish = _dishService.GetById(restaurantId, dishId);
