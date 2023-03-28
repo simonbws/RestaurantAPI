@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Identity;
+using RestaurantAPI.DTO;
+using RestaurantAPI.DTO.Validators;
 using RestaurantAPI.Entities;
 using RestaurantAPI.Middleware;
 using RestaurantAPI.Services;
@@ -15,8 +19,8 @@ namespace RestaurantAPI
 
         public void ConfigureServices(IServiceCollection services)
         {
-            
-            services.AddControllers();
+
+            services.AddControllers().AddFluentValidation();
             services.AddDbContext<RestaurantDbContext>(); //dodanie db contextu
             services.AddScoped<RestaurantSeeder>(); //rejestracja serwisu seedującego
             //assembly czyli zrodlo typu w ktorym automapper przeszuka wszystkie typy do potrzebnej konfiguracji
@@ -26,6 +30,7 @@ namespace RestaurantAPI
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<ErrorHandlingMiddleware>();
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+            services.AddScoped<IValidator<RegisterUserDTO>, RegisterUserDTOValidator>();
             services.AddScoped<RequestTimeMiddleware>();
 
             services.AddSwaggerGen();
