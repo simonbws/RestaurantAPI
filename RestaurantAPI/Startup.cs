@@ -1,11 +1,13 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 using RestaurantAPI.DTO;
 using RestaurantAPI.DTO.Validators;
 using RestaurantAPI.Entities;
 using RestaurantAPI.Middleware;
 using RestaurantAPI.Services;
+using System.Text;
 
 namespace RestaurantAPI
 {
@@ -19,6 +21,25 @@ namespace RestaurantAPI
 
         public void ConfigureServices(IServiceCollection services)
         {
+            var authenticationSettings = new AuthenticationSettings();
+            //bindowanie = polaczenie wartosci z tej sekcji do zmiennej authenticationSettings
+            Configuration.GetSection("Authentication").Bind(authenticationSettings);
+            services.AddAuthentication(option =>
+            {
+                option.DefaultAuthenticateScheme = "Bearer";
+                option.DefaultScheme = "Bearer";
+                option.DefaultChallengeScheme = "Bearer";
+            }).AddJwtBearer(cfg =>
+            {
+                cfg.RequireHttpsMetadata = false;
+                cfg.SaveToken = true;
+                cfg.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    ValidIssuer = authenticationSettings.JwtIssuer,
+                    ValidAudience = authenticationSettings.JwtIssuer,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authenticationSettings.JwtKey)),
+                };
+            });
 
             services.AddControllers().AddFluentValidation();
             services.AddDbContext<RestaurantDbContext>(); //dodanie db contextu
@@ -45,9 +66,10 @@ namespace RestaurantAPI
             app.UseDeveloperExceptionPage();
         }
         app.UseMiddleware<ErrorHandlingMiddleware>();
-            app.UseMiddleware<RequestTimeMiddleware>();
+        app.UseMiddleware<RequestTimeMiddleware>();
+        app.UseAuthentication();
         app.UseHttpsRedirection();
-            app.UseSwagger();
+        app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Restaurant API");
