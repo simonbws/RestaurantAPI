@@ -1,4 +1,5 @@
-﻿using RestaurantAPI.Entities;
+﻿using Microsoft.AspNetCore.Identity;
+using RestaurantAPI.Entities;
 using RestaurantAPI.Middleware;
 using RestaurantAPI.Services;
 
@@ -24,7 +25,9 @@ namespace RestaurantAPI
             services.AddScoped<IDishService, DishService>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<ErrorHandlingMiddleware>();
+            services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
             services.AddScoped<RequestTimeMiddleware>();
+
             services.AddSwaggerGen();
         }
     
