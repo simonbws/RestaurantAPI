@@ -24,5 +24,11 @@ namespace RestaurantAPI.Controllers
             //jesli walidacja tego zapytania powiedzie sie, a serwis utworzy konto uzytkownika w db to zwracamy kod 200
             return Ok();
         }
+        [HttpPost("login")]
+        public ActionResult Login([FromBody]LoginDTO dto)
+        {
+            string token = _accountService.GenerateJwt(dto);
+            return Ok(token);
+        }
     }
 }

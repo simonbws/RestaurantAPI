@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RestaurantAPI.DTO;
@@ -9,6 +10,7 @@ namespace RestaurantAPI.Controllers
 {
     [Route("api/restaurant")]
     [ApiController]
+    [Authorize]
     public class RestaurantController : ControllerBase
 
     {
@@ -38,14 +40,18 @@ namespace RestaurantAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Manager")]
         public ActionResult CreateRestaurant([FromBody] CreateRestaurantDTO dto)
         {  
+            
             var id = _restaurantService.Create(dto);
             return Created($"/api/restaurant/{id}", null);
         }
         //akcja ktora bedzie odpowiadac na zapytania get i zwroci wszystkie
         //restauracje z bazy danych do klienta
         [HttpGet]
+        [Authorize]
         public ActionResult<IEnumerable<RestaurantDTO>> GetAll()
         {
             var restaurantDtos = _restaurantService.GetAll();
@@ -53,6 +59,7 @@ namespace RestaurantAPI.Controllers
             return Ok(restaurantDtos);
         }
         [HttpGet("{id}")]
+        [AllowAnonymous] //ta akcja zezwala na zapytania bez naglowka autoryzacji
         public ActionResult<RestaurantDTO> Get([FromRoute] int id)
         {
 

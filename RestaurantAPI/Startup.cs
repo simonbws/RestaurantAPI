@@ -24,6 +24,8 @@ namespace RestaurantAPI
             var authenticationSettings = new AuthenticationSettings();
             //bindowanie = polaczenie wartosci z tej sekcji do zmiennej authenticationSettings
             Configuration.GetSection("Authentication").Bind(authenticationSettings);
+
+            services.AddSingleton(authenticationSettings);
             services.AddAuthentication(option =>
             {
                 option.DefaultAuthenticateScheme = "Bearer";
@@ -75,8 +77,8 @@ namespace RestaurantAPI
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Restaurant API");
             });
             
-        app.UseRouting();
-       
+        app.UseRouting(); // api mapuje zapytanie do konkretnej akcji w kontrolerze
+        app.UseAuthorization();
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
