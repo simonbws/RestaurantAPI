@@ -51,7 +51,7 @@ namespace RestaurantAPI.Controllers
         //akcja ktora bedzie odpowiadac na zapytania get i zwroci wszystkie
         //restauracje z bazy danych do klienta
         [HttpGet]
-        [Authorize(Policy ="HasNationality")]
+        [Authorize(Policy ="Atleast20")]
         public ActionResult<IEnumerable<RestaurantDTO>> GetAll()
         {
             var restaurantDtos = _restaurantService.GetAll();

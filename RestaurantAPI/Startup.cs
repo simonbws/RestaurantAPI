@@ -1,7 +1,9 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using RestaurantAPI.Authorization;
 using RestaurantAPI.DTO;
 using RestaurantAPI.DTO.Validators;
 using RestaurantAPI.Entities;
@@ -46,9 +48,13 @@ namespace RestaurantAPI
             {
                 //sprawdzamy czy dany claim (Nationality) istnieje bez sprawdzania wartosci - musi byc to spelnione w autoryzacji
                 options.AddPolicy("HasNationality", builder => builder.RequireClaim("Nationality"));
+                options.AddPolicy("Atleast20", builder => builder.AddRequirements(new MinimumAgeRequirement(29)));
+
+
                 //mozliwe sa rownie naglowki z wartosciami (German, Polish)
                 // options.AddPolicy("HasNationality", builder => builder.RequireClaim("Nationality", "German", "Polish"));
             });
+            services.AddScoped<IAuthorizationHandler, MinimumAgeRequirementHandler>();
             services.AddControllers().AddFluentValidation();
             services.AddDbContext<RestaurantDbContext>(); //dodanie db contextu
             services.AddScoped<RestaurantSeeder>(); //rejestracja serwisu seedującego
