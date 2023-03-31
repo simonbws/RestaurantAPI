@@ -59,8 +59,15 @@ namespace RestaurantAPI.Services
                 new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
                 new Claim(ClaimTypes.Role, $"{user.Role.Name}"),
                 new Claim("DateOfBirth", user.DateOfBirth.Value.ToString("yyyy-MM-dd")),
-                new Claim("Nationality", user.Nationality)
+                
             };
+
+            if (!string.IsNullOrEmpty(user.Nationality))
+            {
+                claims.Add(
+                    new Claim("Nationality", user.Nationality)
+                    );
+            }
             //generacja klucza prywatnego z appsetings.json (po wywolaniu singleton z startup.cs)
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authenticationSettings.JwtKey));
             //kredencjały

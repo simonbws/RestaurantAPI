@@ -42,7 +42,13 @@ namespace RestaurantAPI
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authenticationSettings.JwtKey)),
                 };
             });
-
+            services.AddAuthorization(options =>
+            {
+                //sprawdzamy czy dany claim (Nationality) istnieje bez sprawdzania wartosci - musi byc to spelnione w autoryzacji
+                options.AddPolicy("HasNationality", builder => builder.RequireClaim("Nationality"));
+                //mozliwe sa rownie naglowki z wartosciami (German, Polish)
+                // options.AddPolicy("HasNationality", builder => builder.RequireClaim("Nationality", "German", "Polish"));
+            });
             services.AddControllers().AddFluentValidation();
             services.AddDbContext<RestaurantDbContext>(); //dodanie db contextu
             services.AddScoped<RestaurantSeeder>(); //rejestracja serwisu seedującego
