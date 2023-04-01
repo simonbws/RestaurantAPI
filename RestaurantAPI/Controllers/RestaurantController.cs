@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using RestaurantAPI.DTO;
 using RestaurantAPI.Entities;
 using RestaurantAPI.Services;
+using System.Security.Claims;
 
 namespace RestaurantAPI.Controllers
 {
@@ -27,7 +28,7 @@ namespace RestaurantAPI.Controllers
         public ActionResult Update([FromBody] UpdateRestaurantDTO dto, [FromRoute]int id)
         {
             
-            _restaurantService.Update(id, dto);
+            _restaurantService.Update(id, dto, User);
             return Ok();
 
         }
@@ -35,7 +36,7 @@ namespace RestaurantAPI.Controllers
         [HttpDelete("{id}")]
         public ActionResult Delete([FromRoute] int id)
         {
-           _restaurantService.Delete(id);
+           _restaurantService.Delete(id, User);
             return NoContent(); //oznacza 200 ale nic nie zwraca
         }
 
@@ -43,9 +44,10 @@ namespace RestaurantAPI.Controllers
         [Authorize(Roles = "Admin")]
         [Authorize(Roles = "Manager")]
         public ActionResult CreateRestaurant([FromBody] CreateRestaurantDTO dto)
-        {  
-            
-            var id = _restaurantService.Create(dto);
+        {
+            //pobieramy parametr
+            var userId = int.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value);
+            var id = _restaurantService.Create(dto, userId);
             return Created($"/api/restaurant/{id}", null);
         }
         //akcja ktora bedzie odpowiadac na zapytania get i zwroci wszystkie

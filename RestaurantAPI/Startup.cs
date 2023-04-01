@@ -55,6 +55,7 @@ namespace RestaurantAPI
                 // options.AddPolicy("HasNationality", builder => builder.RequireClaim("Nationality", "German", "Polish"));
             });
             services.AddScoped<IAuthorizationHandler, MinimumAgeRequirementHandler>();
+            services.AddScoped<IAuthorizationHandler, ResourceOperationRequirementHandler>();
             services.AddControllers().AddFluentValidation();
             services.AddDbContext<RestaurantDbContext>(); //dodanie db contextu
             services.AddScoped<RestaurantSeeder>(); //rejestracja serwisu seedującego
