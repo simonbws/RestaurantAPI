@@ -49,11 +49,13 @@ namespace RestaurantAPI
                 //sprawdzamy czy dany claim (Nationality) istnieje bez sprawdzania wartosci - musi byc to spelnione w autoryzacji
                 options.AddPolicy("HasNationality", builder => builder.RequireClaim("Nationality"));
                 options.AddPolicy("Atleast20", builder => builder.AddRequirements(new MinimumAgeRequirement(29)));
+                options.AddPolicy("CreatedAtleast2Restaurants", builder => builder.AddRequirements(new CreatedMultipleRestaurantsRequirement(2)));
 
 
                 //mozliwe sa rownie naglowki z wartosciami (German, Polish)
                 // options.AddPolicy("HasNationality", builder => builder.RequireClaim("Nationality", "German", "Polish"));
             });
+            services.AddScoped<IAuthorizationHandler, CreatedMultipleRestaurantsRequirementHandler>();
             services.AddScoped<IAuthorizationHandler, MinimumAgeRequirementHandler>();
             services.AddScoped<IAuthorizationHandler, ResourceOperationRequirementHandler>();
             services.AddControllers().AddFluentValidation();
@@ -68,7 +70,8 @@ namespace RestaurantAPI
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
             services.AddScoped<IValidator<RegisterUserDTO>, RegisterUserDTOValidator>();
             services.AddScoped<RequestTimeMiddleware>();
-
+            services.AddScoped<IUserContextService, UserContextService>();
+            services.AddHttpContextAccessor();
             services.AddSwaggerGen();
         }
     
