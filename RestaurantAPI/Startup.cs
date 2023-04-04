@@ -69,16 +69,27 @@ namespace RestaurantAPI
             services.AddScoped<ErrorHandlingMiddleware>();
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
             services.AddScoped<IValidator<RegisterUserDTO>, RegisterUserDTOValidator>();
-            services.AddScoped<IValidator<RestaurantQuery>,RestaurantQueryValidator>();
+            services.AddScoped<IValidator<RestaurantQuery>, RestaurantQueryValidator>();
             services.AddScoped<RequestTimeMiddleware>();
             services.AddScoped<IUserContextService, UserContextService>();
             services.AddHttpContextAccessor();
             services.AddSwaggerGen();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("FrontEndClient", builder =>
+
+                    builder.AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .WithOrigins(Configuration["AllowedOrigins"])
+                    );
+            });
         }
     
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env, RestaurantSeeder seeder)
     {
+        app.UseStaticFiles();
+        app.UseCors("FrontEndClient");
         seeder.Seed(); //po wywolaniu tej metody, dane zostana zseedowane
         if (env.IsDevelopment())
         {

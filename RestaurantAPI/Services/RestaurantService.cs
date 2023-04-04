@@ -5,6 +5,7 @@ using RestaurantAPI.Authorization;
 using RestaurantAPI.DTO;
 using RestaurantAPI.Entities;
 using RestaurantAPI.Exceptions;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Security.Cryptography;
 
@@ -115,6 +116,23 @@ namespace RestaurantAPI.Services
                 .Include(r => r.Dishes)
                 .Where(r => query.SearchPhrase == null || (r.Name.ToLower().Contains(query.SearchPhrase.ToLower())
                 || r.Description.ToLower().Contains(query.SearchPhrase.ToLower())));
+
+            if (string.IsNullOrEmpty(query.SortBy))
+            {
+                var columnsSelectors = new Dictionary<string, Expression<Func<Restaurant, object>>>
+                {
+                    //name of jesli nazwa kolumny by sie zmienila nie musimy zmieniac kolumny jako name
+                    { nameof(Restaurant.Name), r=>r.Name },
+                    { nameof(Restaurant.Description), r=>r.Description },
+                    { nameof(Restaurant.Category), r=>r.Category },
+                };
+
+                var selectedColumn = columnsSelectors[query.SortBy];
+
+                baseQuery = query.SortDirection == SortDirection.ASC 
+                ? baseQuery.OrderBy(selectedColumn)
+                : baseQuery.OrderByDescending(selectedColumn);
+            }
             //w takiej sytuacji ms sql stworzy zapytanie ktore pobierze z bazy danych resutracje i zwroci pod postacia restaurants
             var restaurants = baseQuery
                 .Skip(query.PageSize * (query.PageNumber - 1))
@@ -126,7 +144,7 @@ namespace RestaurantAPI.Services
             var restaurantsDtos = _mapper.Map<List<RestaurantDTO>>(restaurants);
             //obiekt typu PagedResult dla typu RestaurantDTO
             var result = new PagedResult<RestaurantDTO>(restaurantsDtos,totalItemsCount, query.PageSize, query.PageNumber);
-            return restaurantsDtos;
+            return result;
         }
         public int Create(CreateRestaurantDTO dto)
         {
