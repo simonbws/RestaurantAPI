@@ -54,9 +54,9 @@ namespace RestaurantAPI.Controllers
         //restauracje z bazy danych do klienta
         [HttpGet]
         [Authorize(Policy ="CreatedAtleast2Restaurants")]
-        public ActionResult<IEnumerable<RestaurantDTO>> GetAll()
+        public ActionResult<IEnumerable<RestaurantDTO>> GetAll([FromQuery]string searchPhrase, [FromQuery]int pageNumber, [FromQuery]int pageSize)
         {
-            var restaurantDtos = _restaurantService.GetAll();
+            var restaurantDtos = _restaurantService.GetAll(searchPhrase);
 
             return Ok(restaurantDtos);
         }

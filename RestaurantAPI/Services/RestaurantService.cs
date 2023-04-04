@@ -13,7 +13,7 @@ namespace RestaurantAPI.Services
     public interface IRestaurantService
     {
         int Create(CreateRestaurantDTO dto);
-        IEnumerable<RestaurantDTO> GetAll();
+        IEnumerable<RestaurantDTO> GetAll(string searchPhrase);
         RestaurantDTO GetById(int id);
         void Delete(int id);
         void Update(int id, UpdateRestaurantDTO dto);
@@ -106,7 +106,7 @@ namespace RestaurantAPI.Services
             var result = _mapper.Map<RestaurantDTO>(restaurant);
             return result;
         }
-        public IEnumerable<RestaurantDTO> GetAll()
+        public IEnumerable<RestaurantDTO> GetAll(string searchPhrase)
         {
             //w takiej sytuacji ms sql stworzy zapytanie ktore pobierze z bazy danych resutracje i zwroci pod postacia restaurants
             var restaurants = _dbContext
@@ -114,6 +114,8 @@ namespace RestaurantAPI.Services
                 //na tej podstawie Entity Fr. dolacza odpowiednie tabele do wyniku zapytania
                 .Include(r => r.Address)
                 .Include(r => r.Dishes)
+                .Where(r => searchPhrase == null || (r.Name.ToLower().Contains(searchPhrase.ToLower()) 
+                || r.Description.ToLower().Contains(searchPhrase.ToLower())))
                 .ToList();
             //obiekt restaurantsDtos musi byc zmapowany na podst restrauracji z DB
             //jako generyczny parametr typ na ktory mapujemy i jako arguement zrodlo z ktorego chcemy mapowac (restauracje)
