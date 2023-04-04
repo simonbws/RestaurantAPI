@@ -13,7 +13,7 @@ namespace RestaurantAPI.Services
     public interface IRestaurantService
     {
         int Create(CreateRestaurantDTO dto);
-        IEnumerable<RestaurantDTO> GetAll(string searchPhrase);
+        PagedResult<RestaurantDTO> GetAll(RestaurantQuery query);
         RestaurantDTO GetById(int id);
         void Delete(int id);
         void Update(int id, UpdateRestaurantDTO dto);
@@ -106,20 +106,26 @@ namespace RestaurantAPI.Services
             var result = _mapper.Map<RestaurantDTO>(restaurant);
             return result;
         }
-        public IEnumerable<RestaurantDTO> GetAll(string searchPhrase)
+        public PagedResult<RestaurantDTO> GetAll(RestaurantQuery query)
         {
-            //w takiej sytuacji ms sql stworzy zapytanie ktore pobierze z bazy danych resutracje i zwroci pod postacia restaurants
-            var restaurants = _dbContext
+            var baseQuery = _dbContext
                 .Restaurants
                 //na tej podstawie Entity Fr. dolacza odpowiednie tabele do wyniku zapytania
                 .Include(r => r.Address)
                 .Include(r => r.Dishes)
-                .Where(r => searchPhrase == null || (r.Name.ToLower().Contains(searchPhrase.ToLower()) 
-                || r.Description.ToLower().Contains(searchPhrase.ToLower())))
+                .Where(r => query.SearchPhrase == null || (r.Name.ToLower().Contains(query.SearchPhrase.ToLower())
+                || r.Description.ToLower().Contains(query.SearchPhrase.ToLower())));
+            //w takiej sytuacji ms sql stworzy zapytanie ktore pobierze z bazy danych resutracje i zwroci pod postacia restaurants
+            var restaurants = baseQuery
+                .Skip(query.PageSize * (query.PageNumber - 1))
+                .Take(query.PageSize)
                 .ToList();
+            var totalItemsCount = baseQuery.Count();
             //obiekt restaurantsDtos musi byc zmapowany na podst restrauracji z DB
             //jako generyczny parametr typ na ktory mapujemy i jako arguement zrodlo z ktorego chcemy mapowac (restauracje)
             var restaurantsDtos = _mapper.Map<List<RestaurantDTO>>(restaurants);
+            //obiekt typu PagedResult dla typu RestaurantDTO
+            var result = new PagedResult<RestaurantDTO>(restaurantsDtos,totalItemsCount, query.PageSize, query.PageNumber);
             return restaurantsDtos;
         }
         public int Create(CreateRestaurantDTO dto)
